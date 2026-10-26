@@ -2,6 +2,9 @@
 
 [Download v1.0.0 · 下载Windows版](https://github.com/austinhu98/XXL-Desktop-Pet/releases/download/v1.0.0/XXL-Desktop-Pet-v1.0.0-win64.zip) · [Releases · 版本记录](https://github.com/austinhu98/XXL-Desktop-Pet/releases)
 
+<img width="1303" height="760" alt="bw" src="https://github.com/user-attachments/assets/20a60a89-7b2b-4f8a-afd9-e95b2ceda007" />
+
+
 Unofficial Windows desktop pet **loader** for the game **XXL WOOFIA** (中文：《XXL猛汉特区》).
 It renders Spine skeletal animations on a transparent always-on-top window and lets you install
 character packs you obtained legally as ZIP files.
@@ -171,6 +174,9 @@ on purpose (useful for comparisons) but each caches configuration at startup.
 `XXL Desktop Pet`（中文名 **XXL 桌面宠物**）是一个独立的 Electron 桌面宠物**加载器**，本质是一个
 Spine 运行时宿主。程序本身不带任何角色：首次启动会显示「还没有安装角色」的引导卡，角色通过导入
 ZIP 资源包获得。角色包是纯数据（骨架、图集、贴图、布局、台词），加载器代码对所有角色通用。
+
+<img width="1303" height="760" alt="bw" src="https://github.com/user-attachments/assets/bee87255-ffad-4fe7-965c-cd67e5f0665a" />
+
 
 - 软件名：**XXL Desktop Pet**（中文：**XXL 桌面宠物**）
 - 适配游戏：**XXL WOOFIA**（《XXL猛汉特区》）—— 非官方同人工具
