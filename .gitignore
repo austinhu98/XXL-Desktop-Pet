@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+
+# Local user data / secrets — never commit
+ai-config.local.json
+*.local.json
+data/
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+
+# Characters and resources are user-provided, not part of this repository
+characters/*
+!characters/.gitkeep
+角色导入/
+assets/models/
+assets/stills/
+assets/audio/
+
+# Character packs / exports
+角色资源包/
+*.zip
+*.exe
+
+# Runtime / logs / temp
+work/
+*.log
+npm-debug.log*
+electron-builder.env
+.DS_Store
+Thumbs.db

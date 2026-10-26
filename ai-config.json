@@ -1,0 +1,33 @@
+{
+  "_readme": [
+    "DeepSeek 台词配置。改完保存即可，下一次点击或发呆自动生效（不用重启桌宠）。",
+    "【默认不启用】AI 对话必须先在设置面板勾选「AI 对话」，勾选且填好 Key 之后才会接管台词；",
+    "  未勾选 / 没填 Key / 欠费 / 超时 / 冷却中，一律使用 characters/<id>/dialogues.json 的原台词。",
+    "apiKey 三种填法，优先级 本文件 < ai-config.local.json < 环境变量 DEEPSEEK_API_KEY。",
+    "想隐藏 Key 就新建 ai-config.local.json，写上 {\"apiKey\":\"sk-...\"}，本文件保持空。",
+    "enabled 是整机硬开关：填 false 时即使面板勾选也不会请求接口（排查 / 临时禁用用）。",
+    "rating 保持 sfw；allowAdultInR18Mode 为 true 且桌宠处于成人模式时才允许更直白的调情。"
+  ],
+  "baseUrl": "https://api.deepseek.com",
+  "model": "deepseek-chat",
+  "apiKey": "",
+  "apiKeyEnv": "DEEPSEEK_API_KEY",
+  "temperature": 1.1,
+  "maxTokens": 160,
+  "timeoutMs": 4500,
+  "maxLineChars": 46,
+  "rating": "sfw",
+  "allowAdultInR18Mode": false,
+  "idleIntervalMs": 600000,
+  "prefetch": true,
+  "cachePerKey": 2,
+  "minRequestGapMs": 2000,
+  "maxRequestsPerMinute": 20,
+  "prefetchDelayMs": 7000,
+  "minPrefetchGapMs": 20000,
+  "maxPrefetchPerMinute": 10,
+  "maxConsecutiveFailures": 3,
+  "cooldownMs": 60000,
+  "recentLimit": 8,
+  "log": false
+}

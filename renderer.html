@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'">
+  <title>XXL Desktop Pet</title>
+  <link rel="stylesheet" href="assets/spine-player.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main id="stage" aria-label="XXL Desktop Pet">
+    <div id="player"></div>
+    <!-- 静帧轮播层：与 Spine 播放器互斥，同一时刻只有一个显示。
+         图片按 object-fit: contain 完整居中显示，不留裁切。 -->
+    <div id="stills" class="hidden"><img id="stillsImg" alt=""></div>
+    <div id="hint">右键设置 · 拖动移动 · 单击触发动作</div>
+  </main>
+
+  <!-- 空角色引导：没有任何角色时替代"空白桌面"，让用户知道下一步该做什么。
+       放在 #stage 外面，避免卡片上的点击被当成"拖动角色/点击角色"。 -->
+  <section id="emptyState" class="hidden" aria-label="还没有安装角色">
+    <p class="empty-title">还没有安装角色</p>
+    <p class="empty-text">选一个角色ZIP导入，装好后会自动加载；也可以把ZIP放进导入文件夹。</p>
+    <div class="empty-actions">
+      <button id="emptyImport" class="primary">导入角色</button>
+      <button id="emptyOpenDirectory" class="mini">打开导入文件夹</button>
+    </div>
+    <div class="empty-sub-actions">
+      <button id="emptyOpenSettings" class="mini">打开设置</button>
+      <button id="emptyQuit" class="mini">退出桌宠</button>
+    </div>
+  </section>
+
+  <aside id="dialogueBubble" class="dialogue-bubble hidden" role="status" aria-live="polite" aria-atomic="true"></aside>
+
+  <section id="panel" class="hidden" aria-label="桌宠设置">
+    <div class="panel-title" title="按住这里拖动面板">
+      <span class="panel-title-text">XXL Desktop Pet</span>
+      <button id="hidePanel" title="关闭设置" aria-label="关闭设置">×</button>
+    </div>
+
+    <div class="panel-body">
+      <section class="group">
+        <p class="group-title">角色</p>
+
+        <label class="row"><span class="row-label">角色</span><select id="character"></select></label>
+        <div class="armor-actions">
+          <button id="importCharacter" class="mini">导入角色</button>
+          <button id="openCharacterImports" class="mini">打开导入文件夹</button>
+        </div>
+        <p id="characterImportStatus" class="import-status" role="status" aria-live="polite"></p>
+        <p id="characterImportDirectory" class="import-directory"></p>
+        <p id="dataDirectory" class="import-directory"></p>
+
+        <label class="row"><span id="modeLabel" class="row-label tap-label">模式</span><select id="mode">
+          <option value="sfw">常规模式</option>
+          <option value="r18">成人模式</option>
+        </select></label>
+
+        <label class="row"><span class="row-label">角色造型</span><select id="model"></select></label>
+
+        <!-- 两侧狗头（Q 版 / 正常版）：只有带 sideHeadOptions 的造型才出现，见 buildSideHeadUI -->
+        <div id="sideHeadRow" class="row hidden">
+          <span class="row-label">两侧狗头</span>
+          <div id="sideHeadGroup" class="radio-group"></div>
+        </div>
+
+        <label id="r18Row" class="row hidden"><span class="row-label">R18 状态</span><select id="r18"><option value="ErectOff">收起</option><option value="ErectOn">勃起</option></select></label>
+
+        <!-- 表情行：普通造型仅开发者模式显示；HCG 场景下始终显示（见 updateFaceRowsVisibility） -->
+        <label id="faceRow" class="row dev-only hidden"><span class="row-label">表情</span><select id="face"></select></label>
+        <!-- C2（对方）表情：双人 HCG 才有，同样是场景下始终显示 -->
+        <label id="face2Row" class="row dev-only hidden"><span class="row-label">C2 表情</span><select id="face2"></select></label>
+        <label class="row dev-only hidden"><span class="row-label">动画</span><select id="animation"></select></label>
+
+        <!-- 装甲部件开关：只在「白威装甲」这类带 armor 标记的造型 + 开发者模式下出现 -->
+        <div id="armorBox" class="dev-only hidden card">
+          <p class="armor-title">装甲部件<span id="armorCount" class="armor-count"></span></p>
+          <div id="armorGrid" class="armor-grid"></div>
+          <div class="armor-actions">
+            <button id="armorAllOn" class="mini">全开</button>
+            <button id="armorAllOff" class="mini">全关</button>
+          </div>
+        </div>
+
+        <!-- 任富言三套近似脱衣模型共用一个入口；这里选择实际显示的变体。 -->
+        <div id="rfyVariantBox" class="hidden card">
+          <p class="armor-title">脱衣选项</p>
+          <div id="rfyVariantGrid" class="armor-grid"></div>
+        </div>
+      </section>
+
+      <section class="group">
+        <p class="group-title">显示</p>
+
+        <label class="row size-row"><span class="row-label">角色大小</span><span class="size-ctrl"><input id="size" type="range" min="50" max="150" step="5" value="100"><output id="sizeValue">100%</output></span></label>
+
+        <!-- 显示范围微调：缩放走视口（矢量不糊）、位置走位移，所有角色/造型通用，会被记住 -->
+        <div id="dispCtrl" class="hidden">
+          <label class="row size-row"><span class="row-label">显示缩放</span><span class="size-ctrl"><input id="dispZoom" type="range" min="50" max="150" step="5" value="100"><output id="dispZoomValue">100%</output></span></label>
+          <label class="row size-row"><span class="row-label">左右位置</span><span class="size-ctrl"><input id="dispX" type="range" min="-30" max="30" step="1" value="0"><output id="dispXValue">0%</output></span></label>
+          <label class="row size-row"><span class="row-label">上下位置</span><span class="size-ctrl"><input id="dispY" type="range" min="-30" max="30" step="1" value="0"><output id="dispYValue">0%</output></span></label>
+          <button id="dispReset" class="mini wide">恢复默认显示范围</button>
+        </div>
+      </section>
+
+      <section class="group">
+        <p class="group-title">行为</p>
+
+        <div class="check-row">
+          <label class="check"><input id="alwaysOnTop" type="checkbox" checked><span>始终置顶</span></label>
+          <label class="check" title="勾选后每 10 分钟按当前模式随机换角色 + 换造型：常规模式只在常规造型里抽，成人模式只在成人造型里抽，不含 HCG 场景"><input id="autoSwitch" type="checkbox"><span>自动切换</span></label>
+          <!-- 开发者模式默认不显示：连续点击「模式」两个字 10 次才会解锁 -->
+          <label id="devRow" class="check hidden"><input id="devMode" type="checkbox"><span>开发者模式</span></label>
+        </div>
+
+        <!-- AI 台词：默认关闭。勾选「AI 对话」且配置文件里填好 Key 之后，点击/发呆才由 DeepSeek 现写；
+             未勾选、没 Key、欠费、超时、冷却中一律走 characters/<id>/dialogues.json 的原台词 -->
+        <div class="performance-row" id="aiRow" title="默认关闭：勾选并填好 Key 后才接管台词；其余情况一律使用原台词">
+          <label class="check"><input id="aiEnabled" type="checkbox"><span>AI 对话</span></label>
+          <span id="aiStatus">读取中…</span>
+        </div>
+
+        <!-- 面板里直接填 Key，不用去改 JSON：保存后写 ai-config.local.json。
+             默认隐藏，勾选上面的「AI 对话」才展开（见 renderAiStatus） -->
+        <div id="aiBox" class="card hidden">
+          <p class="armor-title">AI 配置<span id="aiKeyState" class="armor-count"></span></p>
+          <label class="row"><span class="row-label">API Key</span><input id="aiKey" type="password" placeholder="sk-…" autocomplete="off" spellcheck="false"></label>
+          <label class="row"><span class="row-label">模型</span><input id="aiModel" type="text" placeholder="deepseek-chat" autocomplete="off" spellcheck="false"></label>
+          <div class="ai-actions">
+            <button id="aiSave" class="mini">保存</button>
+            <button id="aiTest" class="mini">测试连接</button>
+            <button id="aiClear" class="mini">清除 Key</button>
+            <button id="aiConfig" class="mini">配置文件</button>
+          </div>
+          <p id="aiHint" class="perf-hint hidden"></p>
+        </div>
+
+        <div class="performance-row" title="开启后通常可降低 CPU 占用；若出现黑屏或闪退，请重新关闭">
+          <label class="check"><input id="hardwareAcceleration" type="checkbox"><span>硬件加速</span></label>
+          <span id="hardwareAccelerationStatus">正在读取设置…</span>
+        </div>
+        <!-- 开启硬件加速后若下次起不来，用户就打不开这个面板了 ——
+             所以在"已开启、待重启生效"时把恢复办法直接写在面板里 -->
+        <p id="hardwareAccelerationHint" class="perf-hint hidden"></p>
+        <p id="devHint" class="dev-hint hidden">开发者模式已解锁</p>
+      </section>
+
+      <section class="actions">
+        <button id="clickThrough" class="primary">开启鼠标穿透</button>
+        <button id="quit" class="danger">退出桌宠</button>
+      </section>
+
+      <p id="shortcutTips" class="tips">正在检查快捷键…</p>
+      <a class="credit" id="creditLink" href="https://space.bilibili.com/3418701" target="_blank">by.AustinHu</a>
+    </div>
+  </section>
+
+  <script src="assets/spine-player.min.js"></script>
+  <script src="assets/inject-companion.js"></script>
+  <script src="assets/spine-layout.js"></script>
+  <script src="assets/dialogue-bubble.js"></script>
+  <script src="renderer.js"></script>
+</body>
+</html>

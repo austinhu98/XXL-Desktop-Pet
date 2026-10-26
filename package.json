@@ -1,0 +1,91 @@
+{
+  "name": "xxl-desktop-pet",
+  "version": "1.0.0",
+  "private": true,
+  "description": "XXL Desktop Pet — unofficial Windows desktop pet loader with Spine animation and ZIP character packs",
+  "author": "AustinHu",
+  "license": "MIT",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64",
+    "icons": "node tools/build_icon_assets.js",
+    "icons:neutral": "node tools/generate_neutral_icons.js"
+  },
+  "build": {
+    "appId": "com.xxl.desktoppet",
+    "productName": "XXL Desktop Pet",
+    "copyright": "Unofficial fan tool. Game assets belong to their respective owners.",
+    "directories": {
+      "output": "dist"
+    },
+    "asar": false,
+    "afterPack": "build/afterpack.js",
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer.js",
+      "renderer.html",
+      "styles.css",
+      "config-loader.js",
+      "runtime-paths.js",
+      "character-package.js",
+      "character-importer.js",
+      "ai-dialogue.js",
+      "ai/**/*",
+      "ai-config.json",
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "licenses/**/*",
+      "assets/**/*",
+      "!assets/models/**",
+      "!assets/stills/**",
+      "!assets/audio/**",
+      "package.json"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "XXL Desktop Pet",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "language": "2052",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "artifactName": "${productName} Setup ${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "${productName}.${ext}"
+    }
+  },
+  "devDependencies": {
+    "electron": "44.9.1",
+    "electron-builder": "24.13.3"
+  },
+  "dependencies": {
+    "yauzl": "3.2.0"
+  }
+}
