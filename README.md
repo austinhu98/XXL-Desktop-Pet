@@ -294,6 +294,8 @@ npm run build      # 产出 dist/XXL Desktop Pet.exe（便携版）与安装包
 
 **图标。** 程序与托盘使用原创中性爪印，不含游戏美术；`npm run icons:neutral` 可复现全部尺寸。
 
+**测试角色**可选进行下载测试(https://github.com/austinhu98/XXL-Desktop-Pet/releases/tag/v1.0.0)见页面最下方。
+
 ### 10. 声明与版权
 
 - 本项目是**非官方同人工具**，与《XXL猛汉特区》（XXL WOOFIA）的开发商及发行商不存在官方关联。
